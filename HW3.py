@@ -11,6 +11,9 @@
 import random
 import io
 from contextlib import redirect_stdout
+import builtins
+__builtins__ = builtins
+
 
 
 class CouponDispenser:
@@ -28,12 +31,13 @@ class CouponDispenser:
     def __init__(self, coupon_cards):
         """
         Initialize a new CouponDispenser object.
-
+    
         Args:
             coupon_cards (list[str]): list of possible coupons users can receive.
         """
-        # TODO: Implement per instructions
-        pass
+        self.coupon_cards = coupon_cards
+        self.customer_roster = []
+        self.issued_indices = []
 
     def __str__(self):
         """
@@ -43,8 +47,9 @@ class CouponDispenser:
         Returns:
             str
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.coupon_cards) == 0:
+            return ""
+        return "|".join(self.coupon_cards)
 
     def issue_coupon(self, name):
         """
@@ -60,8 +65,19 @@ class CouponDispenser:
         Returns:
             str: message as described above
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.coupon_cards) == 0:
+            return "The box is empty."
+
+        if name in self.customer_roster:
+            i = self.customer_roster.index(name)
+            coupon_i = self.issued_indices[i]
+            coupon = self.coupon_cards[coupon_i]
+            return f"That name already has a coupon: {coupon}"
+
+        coupon_i = random.randrange(len(self.coupon_cards))
+        self.customer_roster.append(name)
+        self.issued_indices.append(coupon_i)
+        return self.coupon_cards[coupon_i]
 
     def distribute_session(self):
         """
@@ -78,8 +94,33 @@ class CouponDispenser:
 
         Reminder: Use lists only (no dictionaries).
         """
-        # TODO: Implement per instructions 
-        pass
+        round_number = 1
+        while True:
+            user_input = input(
+                f"Round {round_number} - Enter a name (or a comma-separated list), or type 'show' or 'exit': "
+            )
+
+            if user_input == "exit":
+                print("Goodbye!")
+                break
+
+            if user_input == "show":
+                for i in range(len(self.customer_roster)):
+                    name = self.customer_roster[i]
+                    coupon_i = self.issued_indices[i]
+                    coupon = self.coupon_cards[coupon_i]
+                    print(f"{name}: {coupon}")
+                round_number += 1
+                continue
+
+            pieces = user_input.split(",")
+            for piece in pieces:
+                name = piece.strip()
+                if name != "":
+                    msg = self.issue_coupon(name)
+                    print(msg)
+
+            round_number += 1
 
     def tally_distribution(self):
         """
@@ -96,18 +137,21 @@ class CouponDispenser:
         Returns:
             None
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.issued_indices) == 0:
+            print("Empty")
+            return
+
+        for i in range(len(self.coupon_cards)):
+            coupon = self.coupon_cards[i]
+            count = 0
+            for issued in self.issued_indices:
+                if issued == i:
+                    count += 1
+            print(f"{coupon} distribution count: {count}.")
 
 
 def main():
-    """
-    Driver function:
-      - Define the coupon_cards list (example coupons below)
-      - Create a CouponDispenser
-      - Start the interaction via distribute_session()
-      - After exit, call tally_distribution() to print the distribution in the terminal
-    """
+    """Driver function."""
     coupon_cards = [
         "10% off",
         "Free small coffee",
@@ -116,10 +160,9 @@ def main():
     ]
 
     # Uncomment the lines below as you implement each function.
-    # box = CouponDispenser(coupon_cards)
-    # box.distribute_session()
-    # box.tally_distribution()
-    pass
+    box = CouponDispenser(coupon_cards)
+    box.distribute_session()
+    box.tally_distribution()
 
 
 # -----------------------
@@ -400,4 +443,3 @@ def test():
 if __name__ == "__main__":
     main()
     # test()
-
